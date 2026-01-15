@@ -122,7 +122,7 @@ function Home() {
         {/*Product End*/}
 
 
-        {/* Popular Products */}
+        {/* Popular Product */}
         <h3 className='mb-4'>Popular Products<NavLink to='#' className='float-end btn btn-sm btn-secondary'>View All Popular Products <i className="fa-solid fa-arrow-right-long"></i></NavLink></h3>
         <div className="row mb-4">
 
@@ -140,7 +140,7 @@ function Home() {
             </div>
           </div>
           {/*Product End*/}
-          {/*Popular Products*/}
+          {/*Popular Product*/}
           <div className="col-12 col-md-3 mb-4">
             <div className="card">
               <img src={logo} className="card-img-top" alt="logo" />
