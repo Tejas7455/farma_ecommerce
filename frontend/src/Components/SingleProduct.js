@@ -8,7 +8,7 @@ function SingleProduct({ product }) {
   return (
     <div className="col-12 col-md-3 col-sm-4 mb-4">
       <div className="card">
-        <NavLink to={`/product/${product.slug}/${product.id}`}>
+        <NavLink to={`/product/${product.slug}/${product.id}/`}>
           <img
             src={product.image || logo}
             className="card-img-top"

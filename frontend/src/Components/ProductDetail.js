@@ -2,257 +2,294 @@ import React, { useContext, useEffect, useState } from 'react';
 import logo from '../logo.svg';
 import { NavLink, useParams } from 'react-router-dom';
 import SingleRelatedProducts from './SingleRelatedProducts';
-import { CartContext, UserContext} from '../context';
+import { CartContext, UserContext } from '../context';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import axios from 'axios';
-
+import { useRef } from 'react';
 
 function ProductDetail() {
   const baseUrl = 'http://127.0.0.1:8000/api';
-  const [productData, setProductData] = useState([]);
-  console.log('productdata--',productData)
+  const { product_id } = useParams();
+
+  const [productData, setProductData] = useState({});
   const [productImgs, setProductImgs] = useState([]);
   const [productTags, setProductTags] = useState([]);
-  const [relatedProducts, setRelatedproducts] = useState([])
-  console.log('relatedProducts--',relatedProducts);
-  const {product_slug, product_id} = useParams();
-  const [cartButtonClickStatus, setcartButtonClickStatus] = useState(false);
-  const {cartData,setCartData}=useContext(CartContext);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [cartButtonClickStatus, setCartButtonClickStatus] = useState(false);
+
+  const { setCartData } = useContext(CartContext);
   const userContext = useContext(UserContext);
+  
+
+/* INSIDE ProductDetail COMPONENT */
+  const scrollRef = useRef(null);
+
+  const scrollLeft = () => {
+    scrollRef.current.scrollBy({
+      left: -scrollRef.current.offsetWidth,
+      behavior: 'smooth',
+    });
+  };
+
+  const scrollRight = () => {
+    scrollRef.current.scrollBy({
+      left: scrollRef.current.offsetWidth,
+      behavior: 'smooth',
+    });
+  };
+
 
   useEffect(() => {
-    fetchData(baseUrl+'/product/'+product_id);
-    fetchRelatedData(baseUrl+'/related-products/'+product_id);
-    checkProductInCart(product_id);  
-    
-  },[]);
+    fetchData(`${baseUrl}/product/${product_id}/`);
+    fetchRelatedData(`${baseUrl}/related-products/${product_id}/`);
+    checkProductInCart(product_id);
+  }, [product_id]);
 
-  /*if(userContext.login==null){
-    window.location.href="/customer/login"
-  }else{
-    if(ConfirmOrder==false){
-      addOrderInTable();
-    }
-  }*/
+  /* ---------------- FETCH ---------------- */
 
-  function checkProductInCart(product_id){
-    var previousCart=localStorage.getItem('cartData');
-    var cartJson=JSON.parse(previousCart);
-    if(cartJson!=null){
-      cartJson.map((cart)=>{
-        if(cart!=null && cart.product.id == product_id){
-          setcartButtonClickStatus(true);
-        }
-      });
-    }
-  }
-
-  function fetchData(baseurl){
-    fetch(baseurl)
-    .then((response) => response.json())
-    .then((data)=>{
+  function fetchData(url) {
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
         setProductData(data);
-        setProductImgs(data.product_imgs);  
-        setProductTags(data.tag_list);
-    });
+        setProductImgs(data.product_imgs || []);
+        setProductTags(data.tag_list || []);
+      });
   }
 
-  function fetchRelatedData(baseurl){
-    fetch(baseurl)
-    .then((response) => response.json())
-    .then((data)=>{
-      setRelatedproducts(data.results); 
-    });
+  function fetchRelatedData(url) {
+    fetch(url)
+      .then(res => res.json())
+      .then(data => setRelatedProducts(data.results || []));
   }
-  
-  const tagsLinks=[]
-  for(let i=0; i<productTags.length; i++){
-    let tag=productTags[i].trim();
-    tagsLinks.push(<NavLink className='badge bg-secondary text-white me-1'  
-      to={`/products/${tag}`}>{tag}</NavLink>)
+
+  /* ---------------- CART ---------------- */
+
+  function checkProductInCart(id) {
+    const cart = JSON.parse(localStorage.getItem('cartData')) || [];
+    setCartButtonClickStatus(
+      cart.some(item => item?.product.id == id)
+    );
   }
-  
+
   const cartAddButtonHandler = () => {
-    var previousCart=localStorage.getItem('cartData');
-    var cartJson = JSON.parse(previousCart);
-    var cartData={
-        'product':{
-          'id':productData.id,
-          'title':productData.title,
-          'price':productData.price,
-          'image':productData.image,
-        },
-        'user':{
-          'id':1
-        },
-        
-    }
-    if(cartJson!=null){
-      cartJson.push(cartData);
-      var cartString=JSON.stringify(cartJson);
-      localStorage.setItem('cartData',cartString);
-      setCartData(cartJson);
-    }else{
-      var newCartList=[];
-      newCartList.push(cartData);
-      var cartString=JSON.stringify(newCartList);
-      localStorage.setItem('cartData',cartString);
-    }
-    setcartButtonClickStatus(true);
-  }
+    const cart = JSON.parse(localStorage.getItem('cartData')) || [];
+
+    cart.push({
+      product: {
+        id: productData.id,
+        title: productData.title,
+        price: productData.price,
+        image: productData.image || logo
+      },
+      user: { id: 1 }
+    });
+
+    localStorage.setItem('cartData', JSON.stringify(cart));
+    setCartData(cart);
+    setCartButtonClickStatus(true);
+  };
 
   const cartRemoveButtonHandler = () => {
-    var previousCart=localStorage.getItem('cartData');
-    var cartJson=JSON.parse(previousCart);
-    cartJson.map((cart,index)=>{
-        if(cart!=null && cart.product.id == productData.id){
-          //delete cartJson[index];
-          cartJson.splice(index, 1);        
-      }
-    });
-    var cartString=JSON.stringify(cartJson);
-    localStorage.setItem('cartData',cartString);
-    setcartButtonClickStatus(false);
-    setCartData(cartJson);
+    const cart = JSON.parse(localStorage.getItem('cartData')) || [];
+    const updatedCart = cart.filter(
+      item => item.product.id !== productData.id
+    );
+
+    localStorage.setItem('cartData', JSON.stringify(updatedCart));
+    setCartData(updatedCart);
+    setCartButtonClickStatus(false);
+  };
+
+  /* ---------------- WISHLIST ---------------- */
+
+  function saveInWishList() {
+    const customerId = localStorage.getItem('customer_id');
+    const formData = new FormData();
+    formData.append('customer', customerId);
+    formData.append('product', productData.id);
+
+    axios.post(`${baseUrl}/wishlist/`, formData);
   }
 
-  //saveInWishList 
-  function saveInWishList(){
-    const customerId = localStorage.getItem('customer_id');
-    const formData=new FormData();
-    formData.append('customer',customerId);
-    formData.append('product',productData.id);
-    console.log(formData);
-    //submit data
-    axios.post(baseUrl+'/wishlist/',formData)
-    .then(function(response){
-      console.log(response);
-    })
-    .catch(function(error){
-      console.log(error);
-    })
-  }
+  if (!productData.id) return null;
+
+  /* ---------------- TAGS ---------------- */
+
+  const tagsLinks = productTags.map((tag, index) => (
+    <NavLink
+      key={index}
+      className="badge bg-secondary text-white me-2 mb-2"
+      to={`/products/${tag.trim()}`}
+    >
+      {tag}
+    </NavLink>
+  ));
 
   return (
     <section className="container mt-4">
-      <div className="row">
-        <div className="col-4"> 
-        <div id="productThumbnailSlider" className="carousel carousel-dark slide" 
-        data-bs-ride="true">
-        <div className="carousel-indicators">
-          {productImgs.map((img,index)=>{
-              if(index == 0){
-                return <button key={index} type="button" data-bs-target="#productThumbnailSlider"
-                 data-bs-slide-to={index} className="active" aria-current="true" 
-                aria-label="Slide 1"></button>
-            }else{
-              return <button key={index} type="button" data-bs-target="#productThumbnailSlider" 
-              data-bs-slide-to={index} className="active" aria-current="true" 
-              aria-label="Slide 1"></button>
-            }
-          })}
-          
-        </div>
-        <div className="carousel-inner">
-          {productImgs.map((img,index)=>{
-              if(index == 0){
-                return <div className='carousel-item active'>
-                  <img key={index} src={img.image} className='img-thumbnail mb-5' alt={index} />
+      <div className="row g-4">
+        {/* IMAGE */}
+        <div className="col-md-5">
+          <div
+            id="productThumbnailSlider"
+            className="carousel carousel-dark slide"
+            data-bs-ride="true"
+          >
+            <div className="carousel-inner text-center">
+              {productImgs.map((img, index) => (
+                <div
+                  key={index}
+                  className={`carousel-item ${index === 0 ? 'active' : ''}`}
+                >
+                  <img
+                    src={img.image}
+                    className="img-fluid rounded"
+                    style={{ maxHeight: '350px', objectFit: 'contain' }}
+                    alt=""
+                  />
                 </div>
-            }else{
-              return  <div className='carousel-item active'>
-              <img key={index} src={img.image} className='img-thumbnail mb-5' alt={index} />
+              ))}
             </div>
-            }
-          })}
-      </div>
-      </div>
-        </div>
-        <div className="col-7">
-          <h3>{productData.title}</h3>
-          <p>{productData.detail}</p>
-          <h5 className='card-title'>Price: Rs. {productData.price}</h5>
-          <p className='mt-3'>
-          <a title="Demo" href={productData.demo_url} target="blank" className='btn btn-dark btn-sm'>
-            <i className="fa-solid fa-video"></i> Demo</a>
-          
-          {!cartButtonClickStatus &&
-          <button title="Add to Cart" type="button" onClick={cartAddButtonHandler} 
-            className='btn btn-primary btn-sm ms-2'>
-            <i className="fa-solid fa-cart-plus"></i> Add to Cart</button>
-          }
-          {cartButtonClickStatus &&
-          <button title="Remove from Cart" type="button" onClick={cartRemoveButtonHandler}
-            className='btn btn-warning btn-sm ms-2'>
-            <i className="fa-solid fa-cart-plus"></i> Remove from Cart</button>
-          }
-
-          <button title="buy Now" className='btn btn-success btn-sm ms-2'>
-            <i className="fa-solid fa-bag-shopping"></i> Buy Now</button>
-         
-          {
-            userContext.login && <button onClick={saveInWishList} title="Add to Wishlist" className='btn btn-danger btn-sm ms-2'>
-            <i className="fa fa-heart"></i> Wishlist</button>
-          }
-
-          {
-            userContext.login == null && <button title="Add to Wishlist" className='btn btn-danger btn-sm ms-2 disabled'>
-            <i className="fa fa-heart"></i> Wishlist</button>
-          }
-  
-           
-          </p>
-          <hr />
-          <div className='producttags'>
-            <h5 className='mt-3'>Tags</h5>
-            <p>
-              {tagsLinks}
-            </p>
           </div>
         </div>
-     </div>
 
-     {/*Related Products */}
-     {relatedProducts.length > 0 &&
-     <>
-     <h3 className='mt-5 mb-3 text-center'>Related Products</h3>
-     <div id='relatedProductsSlider' className='carousel carousel-dark slide' data-bs-ride="true">
-      <div className='carousel-indicators'>
-          {relatedProducts.map((product,index)=>{
-              if(index == 0){
-                return  <button type="button" data-bs-target="#relatedProductsSlider"
-                 data-bs-slide-to={index} className="active" aria-current="true" 
-                aria-label="Slide 1"></button>
-            }else{
-              return <button type="button" data-bs-target="#relatedProductsSlider" 
-              data-bs-slide-to={index} aria-current="true" 
-              aria-label="Slide 1"></button>
-            }
-          })}
-       
-      </div>
-        <div className='carousel-inner'>
-        {relatedProducts.map((product,index)=>{
-              if(index == 0){
-                return <div className='carousel-item active'>
-                <SingleRelatedProducts product={product}/> 
-                </div>
-            }else{
-              return 
-              <div className='carousel-item active'>
-              <SingleRelatedProducts product={product}/> 
-            </div>
-            }
-          })}
-         
-          
+        {/* DETAILS */}
+        <div className="col-md-7">
+          <h3 className="mb-2">{productData.title}</h3>
+          <p className="text-muted">{productData.detail}</p>
+
+          <h4 className="text-success mb-3">
+            Rs. {Number(productData.price).toLocaleString('en-IN')}
+          </h4>
+
+          <div className="d-flex flex-wrap gap-2 mb-4">
+            <a
+              href={productData.demo_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline-dark btn-sm"
+            >
+              <i className="fa-solid fa-video"></i> Demo
+            </a>
+
+            {!cartButtonClickStatus ? (
+              <button
+                onClick={cartAddButtonHandler}
+                className="btn btn-primary btn-sm"
+              >
+                <i className="fa-solid fa-cart-plus"></i> Add to Cart
+              </button>
+            ) : (
+              <button
+                onClick={cartRemoveButtonHandler}
+                className="btn btn-warning btn-sm"
+              >
+                Remove from Cart
+              </button>
+            )}
+
+            <button className="btn btn-success btn-sm">
+              Buy Now
+            </button>
+
+            {userContext.login ? (
+              <button
+                onClick={saveInWishList}
+                className="btn btn-danger btn-sm"
+              >
+                <i className="fa fa-heart"></i> Wishlist
+              </button>
+            ) : (
+              <button className="btn btn-danger btn-sm" disabled>
+                Wishlist
+              </button>
+            )}
+          </div>
+
+          <hr />
+
+          <h6 className="mb-2">Tags</h6>
+          <div className="d-flex flex-wrap">{tagsLinks}</div>
         </div>
-     </div>
-     </>
-     }
+      </div>
+
+      {/* RELATED PRODUCTS */}
+    {relatedProducts.length > 0 && (
+      <section style={{ marginTop: '60px' }}>
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '20px',
+          }}
+        >
+          <h3 style={{ margin: 0 }}>Related Products</h3>
+
+          <div>
+            <button
+              onClick={scrollLeft}
+              className="btn btn-outline-secondary btn-sm me-2"
+            >
+              ◀
+            </button>
+            <button
+              onClick={scrollRight}
+              className="btn btn-outline-secondary btn-sm"
+            >
+              ▶
+            </button>
+          </div>
+        </div>
+
+        {/* Slider */}
+        <div
+          ref={scrollRef}
+          style={{
+            display: 'flex',
+            overflow: 'hidden',
+            scrollBehavior: 'smooth',
+          }}
+        >
+          {relatedProducts.map(product => (
+            <div
+              key={product.id}
+              style={{
+                flex: '0 0 25%',        // EXACTLY 4 ITEMS
+                maxWidth: '25%',
+                padding: '8px',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Card wrapper for equal height */}
+              <div
+                style={{
+                  height: '100%',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  padding: '10px',
+                  background: '#fff',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <SingleRelatedProducts product={product} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+
+
+
     </section>
-  )
+  );
 }
 
 export default ProductDetail;
