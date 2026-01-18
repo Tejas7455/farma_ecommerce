@@ -4,7 +4,6 @@ import { NavLink, useParams } from 'react-router-dom';
 import SingleRelatedProducts from './SingleRelatedProducts';
 import { CartContext, UserContext } from '../context';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min';
 import axios from 'axios';
 import { useRef } from 'react';
 
@@ -20,9 +19,9 @@ function ProductDetail() {
 
   const { setCartData } = useContext(CartContext);
   const userContext = useContext(UserContext);
-  
 
-/* INSIDE ProductDetail COMPONENT */
+
+  /* INSIDE ProductDetail COMPONENT */
   const scrollRef = useRef(null);
 
   const scrollLeft = () => {
@@ -69,7 +68,7 @@ function ProductDetail() {
   function checkProductInCart(id) {
     const cart = JSON.parse(localStorage.getItem('cartData')) || [];
     setCartButtonClickStatus(
-      cart.some(item => item?.product.id == id)
+      cart.some(item => item?.product.id === id)
     );
   }
 
@@ -133,14 +132,14 @@ function ProductDetail() {
         {/* IMAGE */}
         <div className="col-md-5">
           <div
+            key={product_id}
             id="productThumbnailSlider"
             className="carousel carousel-dark slide"
-            data-bs-ride="true"
           >
             <div className="carousel-inner text-center">
               {productImgs.map((img, index) => (
                 <div
-                  key={index}
+                  key={img.id || img.image}
                   className={`carousel-item ${index === 0 ? 'active' : ''}`}
                 >
                   <img
@@ -153,6 +152,7 @@ function ProductDetail() {
               ))}
             </div>
           </div>
+
         </div>
 
         {/* DETAILS */}
@@ -216,74 +216,74 @@ function ProductDetail() {
       </div>
 
       {/* RELATED PRODUCTS */}
-    {relatedProducts.length > 0 && (
-      <section style={{ marginTop: '60px' }}>
-        {/* Header */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '20px',
-          }}
-        >
-          <h3 style={{ margin: 0 }}>Related Products</h3>
+      {relatedProducts.length > 0 && (
+        <section style={{ marginTop: '60px' }}>
+          {/* Header */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '20px',
+            }}
+          >
+            <h3 style={{ margin: 0 }}>Related Products</h3>
 
-          <div>
-            <button
-              onClick={scrollLeft}
-              className="btn btn-outline-secondary btn-sm me-2"
-            >
-              ◀
-            </button>
-            <button
-              onClick={scrollRight}
-              className="btn btn-outline-secondary btn-sm"
-            >
-              ▶
-            </button>
+            <div>
+              <button
+                onClick={scrollLeft}
+                className="btn btn-outline-secondary btn-sm me-2"
+              >
+                ◀
+              </button>
+              <button
+                onClick={scrollRight}
+                className="btn btn-outline-secondary btn-sm"
+              >
+                ▶
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Slider */}
-        <div
-          ref={scrollRef}
-          style={{
-            display: 'flex',
-            overflow: 'hidden',
-            scrollBehavior: 'smooth',
-          }}
-        >
-          {relatedProducts.map(product => (
-            <div
-              key={product.id}
-              style={{
-                flex: '0 0 25%',        // EXACTLY 4 ITEMS
-                maxWidth: '25%',
-                padding: '8px',
-                boxSizing: 'border-box',
-              }}
-            >
-              {/* Card wrapper for equal height */}
+          {/* Slider */}
+          <div
+            ref={scrollRef}
+            style={{
+              display: 'flex',
+              overflow: 'hidden',
+              scrollBehavior: 'smooth',
+            }}
+          >
+            {relatedProducts.map(product => (
               <div
+                key={product.id}
                 style={{
-                  height: '100%',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '8px',
-                  padding: '10px',
-                  background: '#fff',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  flex: '0 0 25%',        // EXACTLY 4 ITEMS
+                  maxWidth: '25%',
+                  padding: '8px',
+                  boxSizing: 'border-box',
                 }}
               >
-                <SingleRelatedProducts product={product} />
+                {/* Card wrapper for equal height */}
+                <div
+                  style={{
+                    height: '100%',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    padding: '10px',
+                    background: '#fff',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <SingleRelatedProducts product={product} />
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    )}
+            ))}
+          </div>
+        </section>
+      )}
 
 
 
