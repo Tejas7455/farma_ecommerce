@@ -8,19 +8,34 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 function Home() {
   const baseUrl = 'http://127.0.0.1:8000/api';
+
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
-    fetchData(baseUrl + '/products/fetch_limit=4');
+    fetchProducts(baseUrl + '/products/fetch_limit=4');
+    fetchCategories(baseUrl + '/categories/');
   }, []);
 
-  function fetchData(baseurl) {
-    fetch(baseurl)
+  /* ================= Products ================= */
+  function fetchProducts(url) {
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setProducts(data.results);
-      });
+        setProducts(data.results || []);
+      })
+      .catch(err => console.error('Products Error:', err));
+  }
+
+  /* ================= Categories ================= */
+  function fetchCategories(url) {
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        setCategories(data.data || []);
+      })
+      .catch((error) => console.error('Categories Error:', error));
   }
 
   return (
@@ -29,7 +44,7 @@ function Home() {
       {/* ================= Latest Products ================= */}
       <h3 className="mb-4">
         Latest Products
-        <NavLink to="/products" className="float-end btn btn-sm btn-secondary">
+        <NavLink to="/products/" className="float-end btn btn-sm btn-secondary">
           View All Products <i className="fa-solid fa-arrow-right-long"></i>
         </NavLink>
       </h3>
@@ -53,37 +68,43 @@ function Home() {
       {/* ================= Popular Categories ================= */}
       <h3 className="my-5">
         Popular Category
-        <NavLink to="/categories" className="float-end btn btn-sm btn-secondary">
+        <NavLink to="/categories/" className="float-end btn btn-sm btn-secondary">
           View All Category <i className="fa-solid fa-arrow-right-long"></i>
         </NavLink>
       </h3>
 
       <div className="row">
-        {[1, 2, 3, 4].map((_, index) => (
-          <div key={index} className="col-12 col-sm-6 col-md-3 mb-4">
+        {categories.slice(0, 4).map((category) => (
+          <div key={category.id} className="col-12 col-sm-6 col-md-3 mb-4">
             <div
               className="card h-100 border-0 shadow-sm"
               style={{
                 background: 'linear-gradient(135deg, #e3f2fd, #ffffff)'
               }}
             >
-              <img
-                src={logo}
-                alt="category"
-                style={{
-                  height: '180px',
-                  objectFit: 'contain',
-                  padding: '15px'
-                }}
-              />
+              <NavLink to={`/category/${category.id}`}>
+                <img
+                  src={category.image}
+                  alt={category.title}
+                  className="card-img-top"
+                  style={{
+                    height: '180px',
+                    objectFit: 'contain',
+                    padding: '15px'
+                  }}
+                />
+              </NavLink>
+
               <div className="card-body text-center">
-                <h5 className="fw-semibold">Product title</h5>
+                <h5 className="fw-semibold">{category.title}</h5>
+                <p className="text-muted small">{category.detail}</p>
               </div>
+
               <div
                 className="card-footer text-center"
                 style={{ backgroundColor: '#f1f3f5' }}
               >
-                Product Download: 100
+                Category ID: {category.id}
               </div>
             </div>
           </div>
