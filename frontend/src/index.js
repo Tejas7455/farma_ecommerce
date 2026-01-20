@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { UserContext } from './context';
-
+import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 const checkCustomer=localStorage.getItem('customer_login');
 const root = ReactDOM.createRoot(document.getElementById('root'));

@@ -46,6 +46,7 @@ function Register() {
           "last_name":"",
           "username":"",
           "email":"",
+          "mobile":"",
           "password":"",
         });
         seterrorMsg('');
@@ -71,35 +72,35 @@ function Register() {
             <div className='card-body'>
             <p className='text-muted'><strong className='text-danger'> Note: All fields are required</strong></p>
             {successMsg && <p className='text-success'>{successMsg}</p>}
-            {errorMsg && <p className='test-success'>{errorMsg}</p>}
+            {errorMsg && <p className='text-danger'>{errorMsg}</p>}
           <form className='container mt-4 mb-4'>
             <div className="mb-3">
-            <label for="firstname" className="form-label">First Name</label>
+            <label htmlFor="firstname" className="form-label">First Name</label>
             <input type="text" name="first_name" onChange={inputHandler} value={registerFormData.first_name}
              className="form-control" id="firstname" />
             </div>
             <div className="mb-3">
-            <label for="lastname" className="form-label">Last Name</label>
+            <label htmlFor="lastname" className="form-label">Last Name</label>
             <input type="text" name="last_name" onChange={inputHandler} value={registerFormData.last_name}
               className="form-control" id="lastname" />
             </div>
             <div className="mb-3">
-            <label for="username" className="form-label">Username</label>
+            <label htmlFor="username" className="form-label">Username</label>
             <input type="text" name="username" onChange={inputHandler} value={registerFormData.username}
               className="form-control" id="username" />
             </div>
             <div className="mb-3">
-            <label for="email" className="form-label">Email</label>
+            <label htmlFor="email" className="form-label">Email</label>
             <input type="email" name="email" onChange={inputHandler} value={registerFormData.email}
               className="form-control" id="email" />
             </div>
             <div className="mb-3">
-            <label for="mobile" className="form-label">Mobile</label>
+            <label htmlFor="mobile" className="form-label">Mobile</label>
             <input type="number" name="mobile" onChange={inputHandler} value={registerFormData.mobile}
               className="form-control" id="email" />
             </div>
             <div className="mb-3">
-            <label for="password" className="form-label">Password</label>
+            <label htmlFor="password" className="form-label">Password</label>
             <input type="password" name="password" onChange={inputHandler} value={registerFormData.password}
               className="form-control" id="password"/>
             </div>

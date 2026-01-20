@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min';
+
 import { CartContext, UserContext } from '../../context';
 
 function Header() {
@@ -10,12 +10,17 @@ function Header() {
 
   const cartItems = cartData?.length || 0;
 
+  // ✅ Vendor login check
+  const vendorLoggedIn = localStorage.getItem('vendor_login') === 'true';
+
   return (
     <>
+      {/* NAVBAR */}
       <nav
-        className="navbar navbar-expand-lg shadow-sm"
+        className="navbar navbar-expand-lg shadow-sm fixed-top"
         style={{
-          background: 'rgba(55, 55, 55, 0.75)',   // dark gray glass
+          zIndex: 1055,
+          background: 'rgba(55, 55, 55, 0.75)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           borderBottom: '1px solid rgba(255,255,255,0.1)'
@@ -32,6 +37,7 @@ function Header() {
             FarmaFriend
           </NavLink>
 
+          {/* Mobile Toggle */}
           <button
             className="navbar-toggler bg-light"
             type="button"
@@ -67,7 +73,7 @@ function Header() {
                   My Account
                 </button>
 
-                <ul className="dropdown-menu dropdown-menu-end shadow">
+                <ul className="dropdown-menu dropdown-menu-end shadow" style={{ zIndex: 1060 }}>
                   {userContext.login !== 'true' ? (
                     <>
                       <li>
@@ -98,7 +104,7 @@ function Header() {
                 </ul>
               </li>
 
-              {/* Vendor Panel */}
+              {/* ✅ Vendor Panel FIXED */}
               <li className="nav-item dropdown">
                 <button
                   className="btn btn-outline-light dropdown-toggle"
@@ -107,28 +113,34 @@ function Header() {
                   Vendor Panel
                 </button>
 
-                <ul className="dropdown-menu dropdown-menu-end shadow">
-                  <li>
-                    <NavLink className="dropdown-item" to="/seller/register">
-                      Register
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink className="dropdown-item" to="/seller/login">
-                      Login
-                    </NavLink>
-                  </li>
-                  <li><hr className="dropdown-divider" /></li>
-                  <li>
-                    <NavLink className="dropdown-item" to="/seller/dashboard">
-                      Dashboard
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink className="dropdown-item text-danger" to="/seller/logout">
-                      Logout
-                    </NavLink>
-                  </li>
+                <ul className="dropdown-menu dropdown-menu-end shadow" style={{ zIndex: 1060 }}>
+                  {!vendorLoggedIn ? (
+                    <>
+                      <li>
+                        <NavLink className="dropdown-item" to="/seller/register">
+                          Register
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink className="dropdown-item" to="/seller/login">
+                          Login
+                        </NavLink>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li>
+                        <NavLink className="dropdown-item" to="/seller/dashboard">
+                          Dashboard
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink className="dropdown-item text-danger" to="/seller/logout">
+                          Logout
+                        </NavLink>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </li>
 
@@ -136,10 +148,7 @@ function Header() {
               <li className="nav-item">
                 <NavLink className="nav-link fw-semibold text-light" to="/checkout">
                   🛒 Cart
-                  <span
-                    className="badge bg-warning text-dark ms-1"
-                    style={{ fontWeight: 600 }}
-                  >
+                  <span className="badge bg-warning text-dark ms-1">
                     {cartItems}
                   </span>
                 </NavLink>
@@ -149,6 +158,9 @@ function Header() {
           </div>
         </div>
       </nav>
+
+      {/* Space for fixed navbar */}
+      <div style={{ height: '70px' }} />
     </>
   );
 }
