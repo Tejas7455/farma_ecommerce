@@ -6,64 +6,71 @@ function Address() {
   const [addresses, setAddresses] = useState([]);
 
   useEffect(() => {
-    const savedAddresses =
+    const saved =
       JSON.parse(localStorage.getItem('addresses')) || [];
-    setAddresses(savedAddresses);
+
+    const normalized = saved.map(a => ({
+      ...a,
+      isSelected: a.isSelected || false
+    }));
+
+    setAddresses(normalized);
+    localStorage.setItem('addresses', JSON.stringify(normalized));
   }, []);
 
+  const handleSelectAddress = (id) => {
+    const updated = addresses.map(item => ({
+      ...item,
+      isSelected: item.id === id
+    }));
+
+    setAddresses(updated);
+    localStorage.setItem('addresses', JSON.stringify(updated));
+  };
+
   return (
-    <div className='container mt-4'>
-      <div className='row'>
-        <div className='col-md-3 col-12 mb-2'>
+    <div className="container mt-4">
+      <div className="row">
+
+        <div className="col-md-3">
           <Sidebar />
         </div>
 
-        <div className='col-md-9 col-12 mb-2'>
+        <div className="col-md-9">
           <NavLink
-            to='/customer/add-address/'
-            className='btn btn-outline-success mb-3 float-end'
+            to="/customer/add-address/"
+            className="btn btn-outline-success mb-3 float-end"
           >
-            <i className='fa fa-plus' /> Add Address
+            + Add Address
           </NavLink>
 
-          <div className='row'>
+          <div className="row">
             {addresses.length === 0 && (
               <p className="text-muted">No addresses added yet.</p>
             )}
 
-            {addresses.map((item) => (
-              <div className='col-md-4 col-12 mb-3' key={item.id}>
-                <div className='card h-100'>
-                  <div className='card-body text-muted'>
+            {addresses.map(item => (
+              <div className="col-md-4 mb-3" key={item.id}>
+                <div
+                  className={`card h-100 ${
+                    item.isSelected ? 'border border-success border-2' : ''
+                  }`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSelectAddress(item.id)}
+                >
+                  <div className="card-body">
 
-                    {/* Default badge */}
-                    {item.isDefault && (
-                      <span className="badge bg-success mb-2">
-                        Default
+                    {item.isSelected && (
+                      <span className="badge bg-success float-end">
+                        Selected
                       </span>
                     )}
 
-                    <p className="mb-1 fw-semibold text-dark">
-                      {item.address}
-                    </p>
-
-                    {item.road && (
-                      <p className="mb-1">{item.road}</p>
-                    )}
-
-                    {item.landmark && (
-                      <p className="mb-1">
-                        Landmark: {item.landmark}
-                      </p>
-                    )}
-
-                    <p className="mb-1">
-                      {item.city}, {item.state}
-                    </p>
-
-                    <p className="mb-0">
-                      Pincode: {item.pincode}
-                    </p>
+                    <p className="fw-bold mt-2">{item.address}</p>
+                    {item.road && <p>{item.road}</p>}
+                    {item.landmark && <p>Landmark: {item.landmark}</p>}
+                    <p>{item.city}, {item.state}</p>
+                    <p>Pincode: {item.pincode}</p>
 
                   </div>
                 </div>

@@ -101,43 +101,36 @@ def customer_register(request):
     email = request.POST.get('email')
     mobile = request.POST.get('mobile')
     password = request.POST.get('password')
+
     try:
-        user=User.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
+        
+        user = User.objects.create_user(
             username=username,
+            email=email,
             password=password,
+            first_name=first_name,
+            last_name=last_name
         )
-        if user:
-            try:
-            #create customer
-                customer=models.Customer.objects.create(
-                    user=user,
-                    mobile=mobile
-                )
-                msg={
-                    'bool':True,
-                    'user':user.id,
-                    'customer':customer.id,
-                    'msg':'You have register successfully. You can login now.'
-                }
-            except IntegrityError:
-                msg={
-                    'bool':False,
-                    'msg':'Mobile number already exist!!'
-                }
-        else:
-            msg={
-                'bool':False,
-                'msg':'something went wrong....'
-            }
+
+        # ✅ Create customer profile
+        customer = models.Customer.objects.create(
+            user=user,
+            mobile=mobile
+        )
+
+        msg = {
+            'bool': True,
+            'user': user.id,
+            'customer': customer.id,
+            'msg': 'You have registered successfully. You can login now.'
+        }
+
     except IntegrityError:
-            msg={
-                    'bool':False,
-                    'msg':'Username already exist'
-                }
-            
+        msg = {
+            'bool': False,
+            'msg': 'Username or mobile already exists'
+        }
+
     return JsonResponse(msg)
 
 
