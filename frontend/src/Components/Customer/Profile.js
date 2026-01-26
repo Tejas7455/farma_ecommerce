@@ -18,11 +18,11 @@ function Profile() {
 
     if (savedProfile) {
       setProfile({
-        firstname: savedProfile.firstname || '',
-        lastname: savedProfile.lastname || '',
-        username: savedProfile.username || '',
-        email: savedProfile.email || '',
-        image: savedProfile.image || ''
+        firstname: savedProfile?.firstname || '',
+        lastname: savedProfile?.lastname || '',
+        username: savedProfile?.username || '',
+        email: savedProfile?.email || '',
+        image: savedProfile?.image || ''
       });
     }
   }, []);

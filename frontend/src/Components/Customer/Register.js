@@ -44,6 +44,16 @@ function Register() {
           seterrorMsg(response.data.msg);
           setSuccessMsg('');
         } else {
+          const profileData = {
+            firstname: registerFormData.first_name,
+            lastname: registerFormData.last_name,
+            username: registerFormData.username,
+            email: registerFormData.email,
+            image: ''
+          };
+
+          // ✅ Save profile locally
+          localStorage.setItem('profile', JSON.stringify(profileData));
           setRegisterFormData({
             "first_name": "",
             "last_name": "",
