@@ -16,7 +16,7 @@ function SellerRegister() {
     "email": "",
     "password": "",
   });
-
+// Handle input change
   const inputHandler = (event) => {
     const formData = new FormData();
     formData.append('first_name', registerFormData.first_name);
