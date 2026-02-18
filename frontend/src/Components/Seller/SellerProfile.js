@@ -1,7 +1,7 @@
 import React from 'react'
 
 import SellerSidebar from './SellerSidebar';
-
+// This component is currently a placeholder and does not have the functionality to load or save profile data.
 function SellerProfile() {
   return (
   <div className='container mt-5'>
@@ -53,5 +53,5 @@ function SellerProfile() {
   </div>
   )
 }
-
+// The form currently does not have any state management or submit handling, so it will not save any changes made by the user. This is a basic structure for the seller profile page, and additional functionality can be added as needed.
 export default SellerProfile;
